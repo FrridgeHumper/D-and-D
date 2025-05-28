@@ -1,14 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './App.css';
 
-// Import jsPDF differently for better compatibility
-let jsPDF;
-if (typeof window !== 'undefined') {
-  import('jspdf').then(module => {
-    jsPDF = module.default || module.jsPDF;
-  });
-}
-
 // Map generation constants
 const CELL_SIZE = 20;
 const WALL = 0;
