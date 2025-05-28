@@ -268,8 +268,8 @@ class MapGenerator {
 }
 
 // Enhanced Canvas renderer component
-const MapCanvas = ({ mapData, onCanvasClick, selectedTool }) => {
-  const canvasRef = useRef(null);
+const MapCanvas = React.forwardRef(({ mapData, onCanvasClick, selectedTool }, ref) => {
+  const canvasRef = ref || useRef(null);
 
   useEffect(() => {
     if (!mapData || !canvasRef.current) return;
