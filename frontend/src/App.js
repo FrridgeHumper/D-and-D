@@ -124,26 +124,76 @@ class MapGenerator {
     return { x, y, width, height };
   }
 
-  // Enhanced room carving with theme variations
+  // Enhanced room carving with theme variations and advanced shapes
   carveRoom(room) {
     const themeConfig = MAP_THEMES[this.theme];
     
     if (themeConfig.roomStyle === 'irregular') {
-      // Cave-style irregular carving
-      for (let y = room.y; y < room.y + room.height; y++) {
-        for (let x = room.x; x < room.x + room.width; x++) {
-          // Add some randomness to edges for cave feel
-          const isEdge = y === room.y || y === room.y + room.height - 1 || 
-                        x === room.x || x === room.x + room.width - 1;
-          if (!isEdge || Math.random() > 0.3) {
-            this.grid[y][x] = FLOOR;
-          }
-        }
+      // Cave-style irregular carving with more organic shapes
+      this.carveIrregularRoom(room);
+    } else if (themeConfig.roomStyle === 'formal') {
+      // Castle-style with possible circular rooms
+      if (Math.random() > 0.7 && room.width >= 6 && room.height >= 6) {
+        this.carveCircularRoom(room);
+      } else {
+        this.carveStandardRoom(room);
       }
+    } else if (themeConfig.roomStyle === 'organic') {
+      // Camp-style with organic shapes
+      this.carveOrganicRoom(room);
     } else {
       // Standard rectangular carving
-      for (let y = room.y; y < room.y + room.height; y++) {
-        for (let x = room.x; x < room.x + room.width; x++) {
+      this.carveStandardRoom(room);
+    }
+  }
+
+  carveStandardRoom(room) {
+    for (let y = room.y; y < room.y + room.height; y++) {
+      for (let x = room.x; x < room.x + room.width; x++) {
+        this.grid[y][x] = FLOOR;
+      }
+    }
+  }
+
+  carveIrregularRoom(room) {
+    const centerX = room.x + room.width / 2;
+    const centerY = room.y + room.height / 2;
+    const maxRadius = Math.min(room.width, room.height) / 2;
+    
+    for (let y = room.y; y < room.y + room.height; y++) {
+      for (let x = room.x; x < room.x + room.width; x++) {
+        const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+        const noise = (Math.random() - 0.5) * 2; // Random noise for irregular edges
+        if (distance <= maxRadius + noise) {
+          this.grid[y][x] = FLOOR;
+        }
+      }
+    }
+  }
+
+  carveCircularRoom(room) {
+    const centerX = room.x + room.width / 2;
+    const centerY = room.y + room.height / 2;
+    const radius = Math.min(room.width, room.height) / 2 - 1;
+    
+    for (let y = room.y; y < room.y + room.height; y++) {
+      for (let x = room.x; x < room.x + room.width; x++) {
+        const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+        if (distance <= radius) {
+          this.grid[y][x] = FLOOR;
+        }
+      }
+    }
+  }
+
+  carveOrganicRoom(room) {
+    // Organic shape with rounded corners
+    for (let y = room.y; y < room.y + room.height; y++) {
+      for (let x = room.x; x < room.x + room.width; x++) {
+        const isCorner = (x === room.x || x === room.x + room.width - 1) && 
+                        (y === room.y || y === room.y + room.height - 1);
+        
+        if (!isCorner || Math.random() > 0.6) {
           this.grid[y][x] = FLOOR;
         }
       }
