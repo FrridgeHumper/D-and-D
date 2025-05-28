@@ -385,25 +385,41 @@ const useMapExport = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    const link = document.createElement('a');
-    link.download = `${filename}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `${filename}.png`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png', 1.0);
   };
 
-  const exportToPDF = (canvasRef, filename = 'dnd-map') => {
+  const exportToPDF = async (canvasRef, filename = 'dnd-map') => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'px',
-      format: [canvas.width, canvas.height]
-    });
-    
-    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-    pdf.save(`${filename}.pdf`);
+    try {
+      // Ensure jsPDF is loaded
+      if (!jsPDF) {
+        const module = await import('jspdf');
+        jsPDF = module.default || module.jsPDF;
+      }
+      
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      const pdf = new jsPDF({
+        orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`${filename}.pdf`);
+    } catch (error) {
+      console.error('PDF export failed:', error);
+      // Fallback to PNG if PDF fails
+      exportToPNG(canvasRef, filename);
+    }
   };
 
   return { exportToPNG, exportToPDF };
