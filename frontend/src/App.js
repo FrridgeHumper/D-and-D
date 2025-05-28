@@ -400,11 +400,8 @@ const useMapExport = () => {
     if (!canvas) return;
     
     try {
-      // Ensure jsPDF is loaded
-      if (!jsPDF) {
-        const module = await import('jspdf');
-        jsPDF = module.default || module.jsPDF;
-      }
+      // Import jsPDF dynamically
+      const { jsPDF } = await import('jspdf');
       
       const imgData = canvas.toDataURL('image/png', 1.0);
       const pdf = new jsPDF({
@@ -416,8 +413,8 @@ const useMapExport = () => {
       pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
       pdf.save(`${filename}.pdf`);
     } catch (error) {
-      console.error('PDF export failed:', error);
-      // Fallback to PNG if PDF fails
+      console.error('PDF export failed, falling back to PNG:', error);
+      alert('PDF export unavailable, downloading PNG instead');
       exportToPNG(canvasRef, filename);
     }
   };
