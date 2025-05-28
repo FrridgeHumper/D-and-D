@@ -377,7 +377,7 @@ const MapCanvas = React.forwardRef(({ mapData, onCanvasClick, selectedTool }, re
       />
     </div>
   );
-};
+});
 
 // Export functionality
 const useMapExport = () => {
